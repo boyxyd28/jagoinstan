@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jago Dana Cepat</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
+body{
+  background:linear-gradient(to bottom,#f9a825,#f57c00);
+  padding:15px;
+  padding-bottom:80px;
+}
+
+.page{display:none;}
+.show{display:block;}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:16px;
+  margin-top:10px;
+}
+
+.bottom-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:space-around;
+  background:white;
+  padding:12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- DASHBOARD -->
+<div id="dashboardPage" class="page show">
+  <div style="background:linear-gradient(to right,#f59e0b,#f97316);padding:20px;border-radius:20px;color:white;">
+    <div>Selamat datang 👋</div>
+    <div id="namaUser"><b>Nasabah</b></div>
+    <div style="margin-top:10px;">Saldo Anda</div>
+    <div id="saldo" style="font-size:26px;font-weight:bold;">Rp 0</div>
+  </div>
+
+  <div style="margin-top:15px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    <div onclick="showPage('pengajuanPage')" class="card">💰<br><small>Pinjam</small></div>
+    <div onclick="showPage('riwayatPage')" class="card">🧾<br><small>Riwayat</small></div>
+    <div onclick="showPage('cairPage')" class="card">💸<br><small>Cair</small></div>
+    <div onclick="showPage('profilPage')" class="card">👤<br><small>Profil</small></div>
+  </div>
+</div>
+
+<!-- PENGAJUAN -->
+<div id="pengajuanPage" class="page">
+  <div class="card">
+    <h3>Form Pinjaman</h3>
+    <input id="nama" placeholder="Nama">
+    <input id="nik" placeholder="NIK">
+    <input id="gaji" placeholder="Gaji">
+    <input id="pinjam" placeholder="Jumlah Pinjaman">
+
+    <select id="bulan">
+      <option value="12">12 Bulan</option>
+      <option value="24">24 Bulan</option>
+    </select>
+
+    <button onclick="proses()">Ajukan</button>
+    <div id="hasil"></div>
+  </div>
+</div>
+
+<!-- RIWAYAT -->
+<div id="riwayatPage" class="page">
+  <h3>Riwayat</h3>
+  <div id="riwayatBox"></div>
+</div>
+
+<!-- CAIR -->
+<div id="cairPage" class="page">
+  <h3>Pencairan</h3>
+  <button onclick="notif('Dana diproses')">Cairkan</button>
+</div>
+
+<!-- PROFIL -->
+<div id="profilPage" class="page">
+  Nama: <span id="profilNama"></span><br>
+  NIK: <span id="profilNik"></span>
+</div>
+
+<!-- NOTIF -->
+<div id="notifPage" class="page">
+  <h3>Notifikasi</h3>
+  <div id="notifBox"></div>
+</div>
+
+<!-- NAV -->
+<div class="bottom-bar">
+  <div onclick="showPage('dashboardPage')">🏠</div>
+  <div onclick="showPage('pengajuanPage')">📋</div>
+  <div onclick="showPage('riwayatPage')">🧾</div>
+  <div onclick="showPage('cairPage')">💸</div>
+  <div onclick="showPage('profilPage')">👤</div>
+</div>
+
+<script>
+
+// NAV
+function showPage(page){
+  const pages = ["dashboardPage","pengajuanPage","riwayatPage","cairPage","profilPage","notifPage"];
+  pages.forEach(p=>document.getElementById(p).classList.remove("show"));
+  document.getElementById(page).classList.add("show");
+}
+
+// PROSES
+function proses(){
+  let gaji = parseInt(document.getElementById("gaji").value||0);
+  let pinjam = parseInt(document.getElementById("pinjam").value||0);
+  let bulan = parseInt(document.getElementById("bulan").value);
+
+  let limit = gaji*5;
+  let cicilan = pinjam/bulan;
+  let status = pinjam>limit?"❌ Ditolak":"✅ Disetujui";
+
+  document.getElementById("hasil").innerHTML = `
+    <div class="card">
+      Limit: Rp ${limit.toLocaleString("id-ID")}<br>
+      Cicilan: Rp ${Math.floor(cicilan).toLocaleString("id-ID")}<br>
+      Status: ${status}
+    </div>
+  `;
+
+  localStorage.setItem("nama",document.getElementById("nama").value);
+  localStorage.setItem("nik",document.getElementById("nik").value);
+  localStorage.setItem("limit",limit);
+
+  notif("Pengajuan berhasil");
+
+  setTimeout(()=>{
+    loadData();
+    showPage("dashboardPage");
+  },1000);
+}
+
+// NOTIF
+function notif(text){
+  let n = document.getElementById("notifBox");
+  n.innerHTML = '<div class="card">'+text+'</div>'+n.innerHTML;
+}
+
+// LOAD DATA
+function loadData(){
+  let nama = localStorage.getItem("nama") || "Nasabah";
+  let nik = localStorage.getItem("nik") || "-";
+  let limit = parseInt(localStorage.getItem("limit")||0);
+
+  document.getElementById("namaUser").innerText = nama;
+  document.getElementById("profilNama").innerText = nama;
+  document.getElementById("profilNik").innerText = nik;
+  document.getElementById("saldo").innerText = "Rp "+limit.toLocaleString("id-ID");
+}
+
+window.onload = loadData;
+
+</script>
+
+</body>
+</html>
